@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+.uv-cache/
 dist/
 build/
 *.egg-info/
@@ -10,3 +11,5 @@ build/
 data/cache/
 data/raw/
 data/private/
+negotiations/_drafts/
+config/redact_denylist.yaml

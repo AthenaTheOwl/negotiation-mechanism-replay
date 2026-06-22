@@ -1,0 +1,64 @@
+{
+  "mechanisms": [
+    {
+      "id": "adverse-selection",
+      "name": "Adverse selection",
+      "summary": "One side has private type information before selection.",
+      "exemplar_surfaces": ["permission-boundary-kit", "supplier-choice"]
+    },
+    {
+      "id": "hidden-action",
+      "name": "Hidden action",
+      "summary": "An actor can claim effort that the other side cannot observe.",
+      "exemplar_surfaces": ["eval-harness-lab", "task-status"]
+    },
+    {
+      "id": "signaling-leakage",
+      "name": "Signaling leakage",
+      "summary": "A move reveals pressure or preference before value is traded for it.",
+      "exemplar_surfaces": ["agent-routing-table", "handoff-payload"]
+    },
+    {
+      "id": "commitment-credibility",
+      "name": "Commitment credibility",
+      "summary": "A stated constraint matters only if the release rule is visible.",
+      "exemplar_surfaces": ["prompt-budget-ledger", "capacity-hold"]
+    },
+    {
+      "id": "winner's-curse",
+      "name": "Winner's curse",
+      "summary": "Winning can indicate the selected side priced the risk incorrectly.",
+      "exemplar_surfaces": ["procurement-simulator", "bid-floor"]
+    },
+    {
+      "id": "holdup",
+      "name": "Holdup",
+      "summary": "After a party is locked in, the other side can extract value.",
+      "exemplar_surfaces": ["procurement-simulator", "switching-cost"]
+    },
+    {
+      "id": "multi-agent-handoff",
+      "name": "Multi-agent handoff",
+      "summary": "State transfer changes incentives when each agent sees different context.",
+      "exemplar_surfaces": ["agent-routing-table", "handoff-payload"]
+    },
+    {
+      "id": "tool-permission-leakage",
+      "name": "Tool permission leakage",
+      "summary": "A tool call exposes information outside the actor's needed scope.",
+      "exemplar_surfaces": ["permission-boundary-kit", "tool-call"]
+    },
+    {
+      "id": "eval-incentive",
+      "name": "Eval incentive",
+      "summary": "A scoring rule rewards reported success instead of observable behavior.",
+      "exemplar_surfaces": ["eval-harness-lab", "grader-contract"]
+    },
+    {
+      "id": "prompt-budget",
+      "name": "Prompt budget",
+      "summary": "The actor spending context is not the actor paying the opportunity cost.",
+      "exemplar_surfaces": ["prompt-budget-ledger", "context-window"]
+    }
+  ]
+}

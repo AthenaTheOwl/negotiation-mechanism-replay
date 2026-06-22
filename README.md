@@ -1,86 +1,88 @@
 # Negotiation Mechanism Replay
 
-After each significant day-job negotiation, this repo emits a typed
-mechanism-design write-up: incentive map, leakage points, equilibrium. Then
-it queries the AI-build portfolio for any system currently violating the
-same equilibrium principle and emits cross-applied fix recommendations.
+Negotiation Mechanism Replay converts one sanitized negotiation event into one
+mechanism-design report. The report has five sections:
 
-## What this is
+1. Redacted summary.
+2. Incentive map.
+3. Leakage list.
+4. Implied equilibrium.
+5. Cross-application to named portfolio repos.
 
-The user runs procurement, capacity, and escalation negotiations at the
-day job. The same negotiations expose mechanism-design failures —
-information leakage, incentive misalignment, off-equilibrium play — that
-also show up in agent systems and software architectures. Today these
-lessons are lost to memory. This repo turns them into typed artifacts.
+The repo is post-hoc only. It does not store raw day-job material and does not
+operate on `data/raw/` or `data/private/`.
 
-For each registered negotiation event, the repo emits one Markdown file:
+## Current v0.1 surface
 
-1. A redacted summary (no confidential content; mechanism only).
-2. An incentive map — who benefits from what action.
-3. A leakage list — where information or value escapes.
-4. The implied equilibrium — what each side actually optimizes for.
-5. A cross-application section — named portfolio repos that exhibit the
-   same mechanism failure, with a concrete one-sprint fix per repo.
+- JSON-front-matter report format with a checked schema.
+- Portfolio repo index at `config/repo_index.yaml`.
+- Mechanism taxonomy at `config/mechanism_taxonomy.yaml`.
+- Redaction gate for deny-listed entities, currency, percentages, precise
+  calendar dates, and internal codenames.
+- Tag-overlap cross-applier.
+- CLI entry point named `replay`.
+- Tests and gate scripts for the checked-in example and report artifact.
 
-## Status
-
-v0 scaffold. No write-ups, no portfolio query engine. Spec 0001 defines
-the redaction discipline, the mechanism-write-up schema, the
-cross-application rubric, and the gates that land in spec 0002.
-
-## How to run
-
-Placeholder. Spec 0002 will ship the CLI:
+## Run
 
 ```bash
-uv run replay new --negotiation-id 2026-07-procurement-01
-uv run replay cross-apply --negotiation-id 2026-07-procurement-01
-uv run replay redact-check --negotiation-id 2026-07-procurement-01
+uv run pytest
+python scripts/voice_lint.py
+python scripts/spec_check.py
+python scripts/redact_check.py
+python scripts/validate_replay_schema.py
 ```
+
+Target a single report:
+
+```bash
+python scripts/redact_check.py negotiations/2026-07-procurement-01.md
+python scripts/validate_replay_schema.py negotiations/2026-07-procurement-01.md
+uv run replay cross-apply --negotiation-id 2026-07-procurement-01
+```
+
+Create a skeleton from a sanitized draft:
+
+```bash
+uv run replay new --negotiation-id 2026-07-procurement-02 --draft-path negotiations/_drafts/safe-summary.md
+```
+
+The CLI refuses paths under `data/raw/` and `data/private/`.
 
 ## Layout
 
-```
+```text
 .
-├── AGENTS.md
-├── LICENSE
-├── README.md
-├── docs/
-│   └── first-pr.md
-└── specs/
-    └── 0001-foundation/
-        ├── acceptance.md
-        ├── design.md
-        ├── requirements.md
-        └── tasks.md
+|-- config/
+|   |-- mechanism_taxonomy.yaml
+|   |-- redact_denylist.yaml.example
+|   `-- repo_index.yaml
+|-- docs/
+|   |-- product-brief.md
+|   `-- system-map.md
+|-- examples/
+|   `-- 2026-07-procurement-EXAMPLE.md
+|-- negotiations/
+|   `-- 2026-07-procurement-01.md
+|-- schemas/
+|   `-- replay.schema.json
+|-- scripts/
+|   |-- redact_check.py
+|   |-- spec_check.py
+|   |-- validate_replay_schema.py
+|   `-- voice_lint.py
+|-- specs/
+|   |-- 0001-foundation/
+|   `-- 0002-design/
+|-- src/replay/
+`-- tests/
 ```
 
-Planned directories:
+## Confidentiality rule
 
-- `negotiations/` — one Markdown file per negotiation event.
-- `src/replay/` — schema, CLI, redact-check, cross-applier.
-- `config/`
-  - `repo_index.yaml` — portfolio repos and their mechanism-shaped
-    surfaces.
-  - `mechanism_taxonomy.yaml` — named mechanism failures the rubric
-    knows.
-- `tests/` — schema + redaction + cross-application tests.
-
-## Why this exists
-
-Three-way intersection: Amazon TPM negotiation flow, MIT mechanism-design
-literacy, and a personally-owned AI-build portfolio to apply lessons to.
-The output is not a journal. It is a typed pull from one domain into
-another, with a named recipient repo and a one-sprint fix per
-recommendation.
-
-## Confidentiality
-
-Source material is the user's day job. The repo never persists
-counter-party names, monetary terms, or any content that could identify
-a negotiation. The schema enforces a `redacted: true` flag and a
-`redact-check` gate runs against every entry. If the gate fails, the
-file does not commit.
+The user performs the first redaction pass outside the repo. The repo gate is
+the second pass. A file that fails the redaction gate is not a valid checked-in
+artifact.
 
 ## License
 

@@ -1,0 +1,18 @@
+{
+  "named_entities": [
+    "CounterpartyName"
+  ],
+  "internal_codenames": [
+    "InternalCodename"
+  ],
+  "currency_tokens": [
+    "USD",
+    "EUR",
+    "GBP"
+  ],
+  "percentage_tokens": [
+    "%",
+    "percent"
+  ],
+  "date_precision_max": "month"
+}

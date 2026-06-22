@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "negotiation-mechanism-replay"
+version = "0.1.0"
+description = "Generate redacted mechanism-design replay reports from negotiation events."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+replay = "negotiation_mechanism_replay.cli:main"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.2",
+]
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = [".", "src"]
+include = ["negotiation_mechanism_replay*", "replay*"]

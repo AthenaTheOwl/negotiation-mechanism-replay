@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/negotiation-mechanism-replay/replay.schema.json",
+  "title": "Negotiation Mechanism Replay",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "redacted",
+    "created_at",
+    "redacted_summary",
+    "incentive_map",
+    "leakages",
+    "equilibrium",
+    "cross_applications"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-[a-z0-9-]+-\\d{2}$"
+    },
+    "redacted": {
+      "const": true
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}$"
+    },
+    "redacted_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "incentive_map": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/incentive"
+      }
+    },
+    "leakages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/leakage"
+      }
+    },
+    "equilibrium": {
+      "$ref": "#/$defs/equilibrium"
+    },
+    "cross_applications": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/cross_application"
+      }
+    }
+  },
+  "$defs": {
+    "incentive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor_role", "optimizes_for", "constrained_by"],
+      "properties": {
+        "actor_role": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "optimizes_for": {
+          "type": "string",
+          "minLength": 1
+        },
+        "constrained_by": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "leakage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "direction",
+        "magnitude_tier",
+        "mechanism_one_liner",
+        "mechanism_tags"
+      ],
+      "properties": {
+        "kind": {
+          "enum": ["information", "value", "option"]
+        },
+        "direction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "properties": {
+            "from": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "to": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            }
+          }
+        },
+        "magnitude_tier": {
+          "enum": ["small", "material", "large"]
+        },
+        "mechanism_one_liner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mechanism_tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "equilibrium": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed_behavior", "stable_strategy", "failure_mode"],
+      "properties": {
+        "observed_behavior": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stable_strategy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failure_mode": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "cross_application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_slug",
+        "failing_surface",
+        "recommendation",
+        "one_sprint_fix",
+        "confidence"
+      ],
+      "properties": {
+        "repo_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "failing_surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recommendation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "one_sprint_fix": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_./-]+: .+"
+          }
+        },
+        "confidence": {
+          "enum": ["low", "medium", "high"]
+        }
+      }
+    }
+  }
+}
