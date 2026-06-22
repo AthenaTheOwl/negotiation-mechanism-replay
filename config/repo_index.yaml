@@ -1,0 +1,84 @@
+{
+  "repos": [
+    {
+      "slug": "agent-routing-table",
+      "mechanism_surfaces": ["signaling-leakage", "multi-agent-handoff"],
+      "candidate_changes": [
+        {
+          "tag": "signaling-leakage",
+          "file": "src/router/handoff_policy.py",
+          "change": "drop urgency and preference fields from outbound handoff payloads"
+        },
+        {
+          "tag": "multi-agent-handoff",
+          "file": "tests/test_handoff_policy.py",
+          "change": "pin role-only handoff payloads before agent transfer"
+        }
+      ]
+    },
+    {
+      "slug": "eval-harness-lab",
+      "mechanism_surfaces": ["eval-incentive", "hidden-action"],
+      "candidate_changes": [
+        {
+          "tag": "eval-incentive",
+          "file": "src/evals/scoring_contract.py",
+          "change": "separate grader reward from self-reported task completion"
+        },
+        {
+          "tag": "hidden-action",
+          "file": "tests/test_scoring_contract.py",
+          "change": "assert hidden work claims require observable evidence"
+        }
+      ]
+    },
+    {
+      "slug": "prompt-budget-ledger",
+      "mechanism_surfaces": ["prompt-budget", "commitment-credibility"],
+      "candidate_changes": [
+        {
+          "tag": "prompt-budget",
+          "file": "src/budget/ledger.py",
+          "change": "record budget commitments before model calls are dispatched"
+        },
+        {
+          "tag": "commitment-credibility",
+          "file": "docs/commitment-rules.md",
+          "change": "name the condition that releases a budget hold"
+        }
+      ]
+    },
+    {
+      "slug": "permission-boundary-kit",
+      "mechanism_surfaces": ["tool-permission-leakage", "adverse-selection"],
+      "candidate_changes": [
+        {
+          "tag": "tool-permission-leakage",
+          "file": "src/permissions/scope_check.py",
+          "change": "block tool arguments that reveal private negotiation terms"
+        },
+        {
+          "tag": "adverse-selection",
+          "file": "tests/test_scope_check.py",
+          "change": "cover mismatched declared role and requested permission scope"
+        }
+      ]
+    },
+    {
+      "slug": "procurement-simulator",
+      "mechanism_surfaces": ["winner's-curse", "holdup"],
+      "candidate_changes": [
+        {
+          "tag": "winner's-curse",
+          "file": "src/sim/bid_floor.py",
+          "change": "show the inferred floor beside each selected bid"
+        },
+        {
+          "tag": "holdup",
+          "file": "src/sim/lockin.py",
+          "change": "model switching cost before final supplier selection"
+        }
+      ]
+    }
+  ]
+}
