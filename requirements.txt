@@ -1,0 +1,5 @@
+# Streamlit Community Cloud reads this file. streamlit_app.py parses the committed
+# reports under negotiations/*.md and examples/*.md directly (JSON front matter),
+# so it only needs streamlit. The CLI/package under src/replay/ has its own deps
+# in pyproject.toml.
+streamlit>=1.40

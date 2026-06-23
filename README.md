@@ -78,6 +78,34 @@ The CLI refuses paths under `data/raw/` and `data/private/`.
 `-- tests/
 ```
 
+## live demo
+
+A read-only digest of the committed replay reports:
+
+```bash
+uv run replay show
+```
+
+It prints leakages ranked by magnitude, cross-applications ranked by confidence,
+and a one-line headline finding. It reads only the committed reports under
+`negotiations/` and `examples/`, makes no network calls, and exits 0.
+
+A browsable version of the same view runs as a Streamlit page:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+Pick a report, then read its incentive map, ranked leakages, and ranked
+cross-applications.
+
+Streamlit Community Cloud: New app -> repo
+`AthenaTheOwl/negotiation-mechanism-replay`, branch `main`, main file
+`streamlit_app.py`.
+
+<!-- live-url: https://<your-app>.streamlit.app -->
+
 ## Confidentiality rule
 
 The user performs the first redaction pass outside the repo. The repo gate is

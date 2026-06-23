@@ -7,7 +7,7 @@ from pathlib import Path
 
 from replay.matcher import load_repo_index, match_cross_applications
 from replay.redactor import format_findings, scan_file
-from replay.render import render_report, write_report
+from replay.render import render_report, render_summary, write_report
 from replay.schema import (
     CrossApplication,
     Equilibrium,
@@ -49,6 +49,11 @@ def main(argv: list[str] | None = None) -> int:
     validate_parser.add_argument("paths", nargs="*")
     validate_parser.add_argument("--repo-index", default="config/repo_index.yaml")
 
+    show_parser = subparsers.add_parser(
+        "show", help="print a ranked, readable digest of committed replay reports"
+    )
+    show_parser.add_argument("paths", nargs="*")
+
     args = parser.parse_args(argv)
     try:
         if args.command == "new":
@@ -63,6 +68,8 @@ def main(argv: list[str] | None = None) -> int:
             return _redact_check(args.paths, args.denylist)
         if args.command == "validate":
             return _validate(args.paths, args.repo_index)
+        if args.command == "show":
+            return _show(args.paths)
     except (ReplayValidationError, OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -156,6 +163,17 @@ def _validate(paths: list[str], repo_index_path: str) -> int:
         report = load_report(path)
         validate_repo_references(report, repo_index)
         print(f"ok: {path}")
+    return 0
+
+
+def _show(paths: list[str]) -> int:
+    target_paths = _default_report_paths() if not paths else [Path(path) for path in paths]
+    reports = []
+    for path in target_paths:
+        _guard_public_path(path)
+        report = load_report(path)
+        reports.append((report.id, report))
+    sys.stdout.write(render_summary(reports))
     return 0
 
 
