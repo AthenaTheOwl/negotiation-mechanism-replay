@@ -1,5 +1,7 @@
-# Streamlit Community Cloud reads this file. streamlit_app.py parses the committed
-# reports under negotiations/*.md and examples/*.md directly (JSON front matter),
-# so it only needs streamlit. The CLI/package under src/replay/ has its own deps
-# in pyproject.toml.
+# Streamlit Community Cloud reads this file. streamlit_app.py shows the committed
+# reports under negotiations/*.md and examples/*.md (JSON front matter) AND drives
+# the real engine on user input: the schema validator (replay.schema.parse_report_text)
+# and the cross-application matcher (replay.matcher.match_cross_applications).
+# The `.` line installs this repo as a package so `replay` is importable on the Cloud.
 streamlit>=1.40
+.
