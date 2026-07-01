@@ -21,6 +21,15 @@ def test_currency_percentage_and_specific_date_fail() -> None:
     assert {"currency-token", "percentage-token", "specific-date"} <= found
 
 
+def test_finding_reports_the_line_of_the_match() -> None:
+    # A currency token sits on the second line; the finding must report line 2,
+    # so an off-by-one in _line_number would be caught.
+    findings = scan_text("clean first line\nthe term was USD here")
+    currency = [f for f in findings if f.rule == "currency-token"]
+    assert len(currency) == 1
+    assert currency[0].line == 2
+
+
 def test_denylist_terms_fail() -> None:
     found = scan_text(
         "Supplier used CounterpartyName and InternalCodename.",
