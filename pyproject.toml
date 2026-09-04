@@ -9,7 +9,10 @@ description = "Generate redacted mechanism-design replay reports from negotiatio
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-dependencies = []
+dependencies = [
+    "pyyaml>=6.0",
+    "jsonschema>=4.0",
+]
 
 [project.scripts]
 replay = "negotiation_mechanism_replay.cli:main"
