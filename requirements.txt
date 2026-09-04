@@ -5,3 +5,7 @@
 # The `.` line installs this repo as a package so `replay` is importable on the Cloud.
 streamlit>=1.40
 .
+
+# required by scripts/validate_data_conformance.py (DEC: data-conformance gate)
+jsonschema
+pyyaml
