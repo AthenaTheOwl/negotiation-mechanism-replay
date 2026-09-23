@@ -77,20 +77,21 @@ Streamlit Community Cloud: New app -> repo
 ## How it connects
 
 The cross-applier carries a finding out of one negotiation and into the repos that
-share its mechanism. A leaked urgency field is the same hole whether it's a supplier
+share its mechanism (the targets below are entries in `config/repo_index.yaml`,
+not published repos). A leaked urgency field is the same hole whether it's a supplier
 reading a buyer or a router forwarding a payload it shouldn't:
 
-- [agent-routing-table](https://github.com/AthenaTheOwl/agent-routing-table) —
+- `agent-routing-table` —
   handoff payloads that ship urgency before the receiving agent has a need for it.
   The signaling leak, in code.
-- [prompt-budget-ledger](https://github.com/AthenaTheOwl/prompt-budget-ledger) —
+- `prompt-budget-ledger` —
   budget commitments recorded after the spend, so the spender and the approver never
   see the same constraint.
-- [eval-harness-lab](https://github.com/AthenaTheOwl/eval-harness-lab) — grader
+- `eval-harness-lab` — grader
   reward tangled up with self-reported completion; the hidden-action surface.
-- [permission-boundary-kit](https://github.com/AthenaTheOwl/permission-boundary-kit)
+- `permission-boundary-kit`
   — tool arguments that reveal private terms; adverse selection at the scope check.
-- [procurement-simulator](https://github.com/AthenaTheOwl/procurement-simulator) —
+- `procurement-simulator` —
   the winner's curse and holdup, modeled before a supplier is picked.
 
 The repo index lives at `config/repo_index.yaml`; the mechanism taxonomy at
