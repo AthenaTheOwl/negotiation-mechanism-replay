@@ -140,3 +140,7 @@ tests/
 ## License
 
 MIT. See `LICENSE`.
+
+## Method update
+
+[October method update: A redaction gate cannot certify the whole story safe](docs/residual-reidentification.md).
