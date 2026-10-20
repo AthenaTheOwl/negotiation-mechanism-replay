@@ -16,7 +16,9 @@ from replay.schema import (
     ReplayReport,
     ReplayValidationError,
     load_json_object,
+    extract_front_matter,
     load_report,
+    repo_visibility,
     validate_repo_references,
 )
 
@@ -42,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
     new_parser.add_argument("--negotiation-id", required=True)
     new_parser.add_argument("--draft-path")
     new_parser.add_argument("--force", action="store_true")
+    new_parser.add_argument("--repo-index", default="config/repo_index.yaml")
     _add_denylist_arguments(new_parser)
 
     cross_parser = subparsers.add_parser("cross-apply", help="emit repo-index matches for a replay")
@@ -50,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
 
     render_parser = subparsers.add_parser("render", help="render a replay from front matter")
     render_parser.add_argument("--negotiation-id", required=True)
+    render_parser.add_argument("--repo-index", default="config/repo_index.yaml")
 
     redact_parser = subparsers.add_parser("redact-check", help="run the redaction gate")
     redact_parser.add_argument("paths", nargs="*")
@@ -63,6 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         "show", help="print a ranked, readable digest of committed replay reports"
     )
     show_parser.add_argument("paths", nargs="*")
+    show_parser.add_argument("--repo-index", default="config/repo_index.yaml")
 
     args = parser.parse_args(argv)
     try:
@@ -72,14 +77,14 @@ def main(argv: list[str] | None = None) -> int:
             return _cross_apply(args)
         if args.command == "render":
             report = load_report(_report_path(args.negotiation_id))
-            sys.stdout.write(render_report(report))
+            sys.stdout.write(render_report(report, _visibility(args.repo_index)))
             return 0
         if args.command == "redact-check":
             return _redact_check(args.paths, args.denylist, args.no_denylist)
         if args.command == "validate":
             return _validate(args.paths, args.repo_index)
         if args.command == "show":
-            return _show(args.paths)
+            return _show(args.paths, args.repo_index)
     except DenylistNotConfiguredError as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
@@ -141,7 +146,7 @@ def _new(args: argparse.Namespace) -> int:
         ],
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    write_report(report, output_path)
+    write_report(report, output_path, _visibility(args.repo_index))
     print(output_path)
     return 0
 
@@ -203,20 +208,28 @@ def _validate(paths: list[str], repo_index_path: str) -> int:
     repo_index = load_json_object(repo_index_path)
     for path in target_paths:
         _guard_public_path(path)
-        report = load_report(path)
-        validate_repo_references(report, repo_index)
+        front_matter, body = extract_front_matter(Path(path).read_text(encoding="utf-8"))
+        report = ReplayReport.from_dict(front_matter)
+        validate_repo_references(report, repo_index, body)
         print(f"ok: {path}")
     return 0
 
 
-def _show(paths: list[str]) -> int:
+def _visibility(repo_index_path: str) -> dict[str, str] | None:
+    """Visibility per repo slug, or None when the index is absent (show stays offline-safe)."""
+    if not Path(repo_index_path).exists():
+        return None
+    return repo_visibility(load_json_object(repo_index_path))
+
+
+def _show(paths: list[str], repo_index_path: str = "config/repo_index.yaml") -> int:
     target_paths = _default_report_paths() if not paths else [Path(path) for path in paths]
     reports = []
     for path in target_paths:
         _guard_public_path(path)
         report = load_report(path)
         reports.append((report.id, report))
-    sys.stdout.write(render_summary(reports))
+    sys.stdout.write(render_summary(reports, _visibility(repo_index_path)))
     return 0
 
 

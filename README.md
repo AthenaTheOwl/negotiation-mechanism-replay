@@ -51,16 +51,18 @@ material  2026-07-procurement-99  information  buyer -> supplier-1  signaling-le
 
 ## cross-applications (ranked by confidence)
 
-conf    report                  repo                  failing surface
-------  ----------------------  --------------------  ------------------------------------------------------------------------------
-high    2026-07-procurement-01  agent-routing-table   handoff payloads expose urgency fields before a receiving agent needs them
-high    2026-07-procurement-99  agent-routing-table   handoff payloads expose urgency fields before a receiving agent needs them
-medium  2026-07-procurement-01  prompt-budget-ledger  budget commitments are recorded after the model call has already spent context
+conf    report                  repo                             failing surface
+------  ----------------------  -------------------------------  ------------------------------------------------------------------------------
+high    2026-07-procurement-01  agent-routing-table [external]   handoff payloads expose urgency fields before a receiving agent needs them
+high    2026-07-procurement-99  agent-routing-table [external]   handoff payloads expose urgency fields before a receiving agent needs them
+medium  2026-07-procurement-01  prompt-budget-ledger [external]  budget commitments are recorded after the model call has already spent context
 
 ## headline
 
 the sharpest leak is material (information, buyer -> supplier-1) in 2026-07-procurement-01: Fallback uncertainty leaked before supplier-1 committed a concrete option.
-highest-confidence cross-apply: agent-routing-table (high) - handoff payloads expose urgency fields before a receiving agent needs them
+highest-confidence cross-apply: agent-routing-table [external] (high) - handoff payloads expose urgency fields before a receiving agent needs them
+
+[external] repos are private or unpublished; there is no public link to follow.
 ```
 
 Leakages ranked by magnitude, cross-applications by confidence, and one headline
@@ -85,8 +87,11 @@ Streamlit Community Cloud: New app -> repo
 ## How it connects
 
 The cross-applier carries a finding out of one negotiation and into the repos that
-share its mechanism (the targets below are entries in `config/repo_index.yaml`,
-not published repos). A leaked urgency field is the same hole whether it's a supplier
+share its mechanism. All five targets below are `external`: private or unpublished,
+not in the public portfolio, so there is nothing to link to. Each entry in
+`config/repo_index.yaml` declares its `visibility` (`public` or `external`), and
+`show`, `render` and the reports themselves tag every external target. `validate`
+fails a report whose heading for an external repo leaves the label off. A leaked urgency field is the same hole whether it's a supplier
 reading a buyer or a router forwarding a payload it shouldn't:
 
 - `agent-routing-table` —

@@ -3,14 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from replay.schema import ReplayReport, ReplayValidationError, load_json_object
+from replay.schema import ReplayReport, load_json_object, repo_visibility
 
 
 def load_repo_index(path: str | Path = "config/repo_index.yaml") -> dict[str, Any]:
     repo_index = load_json_object(path)
-    repos = repo_index.get("repos")
-    if not isinstance(repos, list):
-        raise ReplayValidationError("repo index must contain repos[]")
+    repo_visibility(repo_index)  # repos[] present and every entry declares visibility
     return repo_index
 
 
@@ -32,6 +30,7 @@ def match_cross_applications(report: ReplayReport, repo_index: dict[str, Any]) -
             candidates.append(
                 {
                     "repo_slug": slug,
+                    "repo_visibility": repo.get("visibility"),
                     "matched_tags": [tag],
                     "failing_surface": f"{tag} on {slug}",
                     "recommendation": f"Constrain {change['file']} so it can {change['change']}.",

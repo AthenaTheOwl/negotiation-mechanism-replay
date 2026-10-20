@@ -13,6 +13,10 @@ ROLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 FIX_RE = re.compile(r"^[A-Za-z0-9_./-]+: .+")
 
 
+REPO_VISIBILITIES = {"public", "external"}
+EXTERNAL_REPO_NOTE = "external: private or unpublished, not in the public portfolio"
+
+
 class ReplayValidationError(ValueError):
     """Raised when a replay report violates the repository contract."""
 
@@ -205,11 +209,43 @@ def load_json_object(path: str | Path) -> dict[str, Any]:
     return data
 
 
-def validate_repo_references(report: ReplayReport, repo_index: dict[str, Any]) -> None:
+def repo_visibility(repo_index: dict[str, Any]) -> dict[str, str]:
+    """Map each repo-index slug to its declared visibility."""
     repos = repo_index.get("repos")
     if not isinstance(repos, list):
         raise ReplayValidationError("repo index must contain repos[]")
-    slugs = {repo.get("slug") for repo in repos if isinstance(repo, dict)}
+    visibility: dict[str, str] = {}
+    for repo in repos:
+        if not isinstance(repo, dict) or not isinstance(repo.get("slug"), str):
+            continue
+        value = repo.get("visibility")
+        if value not in REPO_VISIBILITIES:
+            raise ReplayValidationError(
+                f"repo_index entry {repo['slug']} must declare visibility as one of "
+                f"{sorted(REPO_VISIBILITIES)}"
+            )
+        visibility[repo["slug"]] = value
+    return visibility
+
+
+def repo_label(slug: str, visibility: dict[str, str] | None = None) -> str:
+    """Name a repo the way a reader should see it: external repos say so."""
+    if visibility and visibility.get(slug, "public") != "public":
+        return f"{slug} ({EXTERNAL_REPO_NOTE})"
+    return slug
+
+
+def validate_repo_references(
+    report: ReplayReport, repo_index: dict[str, Any], body: str | None = None
+) -> None:
+    visibility = repo_visibility(repo_index)
     for item in report.cross_applications:
-        if item.repo_slug not in slugs:
+        if item.repo_slug not in visibility:
             raise ReplayValidationError(f"cross_application repo_slug not in repo_index: {item.repo_slug}")
+        if body is not None and visibility[item.repo_slug] != "public":
+            heading = f"### {repo_label(item.repo_slug, visibility)}"
+            if heading not in body.splitlines():
+                raise ReplayValidationError(
+                    f"cross_application {item.repo_slug} is {visibility[item.repo_slug]}; "
+                    f"its heading must read '{heading}'"
+                )

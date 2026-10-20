@@ -90,7 +90,7 @@ A buyer exposed fallback uncertainty while trying to preserve capacity optionali
 
 ## Cross-application to portfolio repos
 
-### agent-routing-table
+### agent-routing-table (external: private or unpublished, not in the public portfolio)
 
 - Failing surface: handoff payloads expose urgency fields before a receiving agent needs them.
 - Recommendation: make the router pass role-level state until the receiving agent has a scoped need for urgency or preference fields.
@@ -99,7 +99,7 @@ A buyer exposed fallback uncertainty while trying to preserve capacity optionali
   - tests/test_handoff_policy.py: assert role-only signals leave the router
 - Confidence: high
 
-### prompt-budget-ledger
+### prompt-budget-ledger (external: private or unpublished, not in the public portfolio)
 
 - Failing surface: budget commitments are recorded after the model call has already spent context.
 - Recommendation: record the commitment before dispatch so the spender and approver see the same constraint.

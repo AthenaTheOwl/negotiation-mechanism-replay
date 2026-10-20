@@ -19,7 +19,9 @@ portfolio.
 - No marketing words. The portfolio voice spec banlist applies.
 - No antithetical reversals as a structural device.
 - Every cross-application names a specific repo by slug and a
-  specific change. Vague cross-applications ("could inform our
+  specific change. A repo that is not in the public portfolio is
+  `"visibility": "external"` in `config/repo_index.yaml`, and its
+  report heading says so; `validate` enforces the label. Vague cross-applications ("could inform our
   agent architecture") are a gate failure.
 - Plain assertions. The mechanism diagram is the spine; the prose is
   scaffolding.

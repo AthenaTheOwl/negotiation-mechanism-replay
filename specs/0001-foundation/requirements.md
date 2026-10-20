@@ -24,13 +24,15 @@ Each `leakages` entry: `kind` (information / value / option),
 
 ## R-NMR-005 — cross-application schema
 Each `cross_applications` entry: `repo_slug` (must exist in
-`config/repo_index.yaml`), `failing_surface`, `recommendation`,
+`config/repo_index.yaml`; an `external` repo's report heading carries
+the external label), `failing_surface`, `recommendation`,
 `one_sprint_fix` (bulleted file-level changes), `confidence`
 (low / medium / high).
 
 ## R-NMR-006 — repo index
-`config/repo_index.yaml` lists portfolio repos with `slug` and
-`mechanism_surfaces[]` — short tags such as `multi-agent-handoff`,
+`config/repo_index.yaml` lists portfolio repos with `slug`,
+`visibility` (`public`, or `external` for a private or unpublished repo
+with no public link) and `mechanism_surfaces[]` — short tags such as `multi-agent-handoff`,
 `tool-permission-leakage`, `eval-incentive`, `prompt-budget`. The
 cross-applier matches negotiation leakages against these tags.
 

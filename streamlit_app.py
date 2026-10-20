@@ -54,6 +54,28 @@ def load_reports() -> dict[str, dict]:
     return reports
 
 
+def _load_visibility() -> dict[str, str]:
+    """Repo slug -> declared visibility from the committed repo index."""
+    try:
+        index = json.loads((REPO / "config" / "repo_index.yaml").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {
+        repo["slug"]: repo.get("visibility", "public")
+        for repo in index.get("repos", [])
+        if isinstance(repo, dict) and isinstance(repo.get("slug"), str)
+    }
+
+
+_VISIBILITY = _load_visibility()
+
+
+def _repo_cell(slug: str | None) -> str | None:
+    """Tag repos outside the public portfolio, e.g. 'slug [external]'."""
+    visibility = _VISIBILITY.get(slug or "", "public")
+    return slug if visibility == "public" else f"{slug} [{visibility}]"
+
+
 st.set_page_config(
     page_title="negotiation-mechanism-replay", layout="wide"
 )
@@ -129,7 +151,7 @@ st.dataframe(
     [
         {
             "confidence": c.get("confidence"),
-            "repo": c.get("repo_slug"),
+            "repo": _repo_cell(c.get("repo_slug")),
             "failing surface": c.get("failing_surface"),
             "recommendation": c.get("recommendation"),
         }
@@ -292,7 +314,7 @@ if st.button("validate + recompute cross-applications", type="primary"):
                 [
                     {
                         "confidence": c.get("confidence"),
-                        "repo": c.get("repo_slug"),
+                        "repo": _repo_cell(c.get("repo_slug")),
                         "matched tag": ", ".join(c.get("matched_tags", [])),
                         "failing surface": c.get("failing_surface"),
                         "recommendation": c.get("recommendation"),
