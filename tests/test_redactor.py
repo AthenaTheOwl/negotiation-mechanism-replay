@@ -43,6 +43,14 @@ def test_percent_sign_fails() -> None:
         assert "percentage-token" in rules(text), text
 
 
+def test_percent_sign_before_space_period_paren_or_end_fails() -> None:
+    # A trailing \b after '%' needs a word character next, so each of these
+    # passed the gate while '12 percent' was caught.
+    for text in ("12%", "(12%)", "0.5%.", "The fee was 12% of spend."):
+        assert "percentage-token" in rules(text), text
+    assert "percentage-token" in rules("12 percent")
+
+
 def test_currency_symbols_and_names_fail() -> None:
     for text in ("paid €400", "paid £400", "¥300", "paid ₹400", "paid 400 euros", "paid 400 dollars"):
         assert "currency-token" in rules(text), text
