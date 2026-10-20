@@ -7,15 +7,24 @@ from pathlib import Path
 from typing import Iterable
 
 
-CURRENCY_RE = re.compile(r"\$|\b(?:USD|EUR|GBP|INR|JPY|CAD|AUD)\b", re.IGNORECASE)
-PERCENT_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|percent|percentage points?)\b", re.IGNORECASE)
+CURRENCY_RE = re.compile(
+    r"[$€£¥₹]|\b(?:USD|EUR|GBP|INR|JPY|CAD|AUD)\b"
+    r"|\b\d[\d,.]*\s*(?:dollars?|euros?|pounds? sterling|rupees?|yen)\b",
+    re.IGNORECASE,
+)
+PERCENT_RE = re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|(?:percent|percentage points?)\b)", re.IGNORECASE)
 PRECISE_DATE_RES = [
     re.compile(r"\b\d{4}-\d{2}-\d{2}\b"),
     re.compile(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b"),
+    re.compile(r"\b\d{1,2}\.\d{1,2}\.\d{4}\b"),
     re.compile(
         r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
-        r"[a-z]*\s+\d{1,2}(?:,\s*\d{4})?\b",
+        r"[a-z]*\.?\s+\d{1,2}(?:,\s*\d{4})?\b",
         re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?"
+        r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b"
     ),
 ]
 DEFAULT_DENYLIST_PATH = Path("config/redact_denylist.yaml")

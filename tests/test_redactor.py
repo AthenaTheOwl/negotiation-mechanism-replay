@@ -36,3 +36,23 @@ def test_denylist_terms_fail() -> None:
         {"named_entities": ["CounterpartyName"], "internal_codenames": ["InternalCodename"]},
     )
     assert {item.rule for item in found} == {"named-entity", "internal-codename"}
+
+
+def test_percent_sign_fails() -> None:
+    for text in ("a 12% discount", "cut by 12%.", "12%", "(15%)", "15 %"):
+        assert "percentage-token" in rules(text), text
+
+
+def test_currency_symbols_and_names_fail() -> None:
+    for text in ("paid €400", "paid £400", "¥300", "paid ₹400", "paid 400 euros", "paid 400 dollars"):
+        assert "currency-token" in rules(text), text
+
+
+def test_day_first_and_dotted_dates_fail() -> None:
+    for text in ("14 July 2026", "the 14th of July", "18 Oct 2026", "18.10.2026", "Oct. 18"):
+        assert "specific-date" in rules(text), text
+
+
+def test_month_year_and_lowercase_may_pass() -> None:
+    assert rules("The replay covers July 2026.") == set()
+    assert rules("Step 2 may reveal the buyer's urgency.") == set()
