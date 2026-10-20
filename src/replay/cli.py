@@ -21,8 +21,17 @@ from replay.schema import (
 )
 
 
-ROOT = Path.cwd()
-PRIVATE_DIRS = [ROOT / "data" / "raw", ROOT / "data" / "private"]
+def _private_dirs() -> list[Path]:
+    # Anchor to the checkout this module lives in, so running from a
+    # subdirectory cannot bypass the guard; keep the cwd-relative dirs too.
+    roots = [Path.cwd()]
+    repo_root = Path(__file__).resolve().parents[2]
+    if (repo_root / "pyproject.toml").is_file():
+        roots.append(repo_root)
+    return [root / "data" / name for root in roots for name in ("raw", "private")]
+
+
+PRIVATE_DIRS = _private_dirs()
 
 
 def main(argv: list[str] | None = None) -> int:

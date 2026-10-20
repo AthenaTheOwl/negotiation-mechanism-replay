@@ -56,3 +56,13 @@ def test_main_refuses_private_paths_for_file_commands(
     assert cli_mod.main([command, str(private_path)]) != 0
     captured = capsys.readouterr()
     assert "refusing to read or write private path" in captured.err
+
+
+def test_default_guard_is_anchored_to_repo_root_not_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = Path(cli_mod.__file__).resolve().parents[2]
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(cli_mod, "PRIVATE_DIRS", cli_mod._private_dirs())
+    with pytest.raises(ReplayValidationError, match="refusing to read or write private path"):
+        cli_mod._guard_public_path(repo_root / "data" / "raw" / "draft.md")
