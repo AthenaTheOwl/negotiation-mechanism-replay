@@ -1,7 +1,9 @@
 {
+  "_visibility": "public: a published repo in the owner's portfolio. external: private or unpublished, so there is no public link to follow.",
   "repos": [
     {
       "slug": "agent-routing-table",
+      "visibility": "external",
       "mechanism_surfaces": ["signaling-leakage", "multi-agent-handoff"],
       "candidate_changes": [
         {
@@ -18,6 +20,7 @@
     },
     {
       "slug": "eval-harness-lab",
+      "visibility": "external",
       "mechanism_surfaces": ["eval-incentive", "hidden-action"],
       "candidate_changes": [
         {
@@ -34,6 +37,7 @@
     },
     {
       "slug": "prompt-budget-ledger",
+      "visibility": "external",
       "mechanism_surfaces": ["prompt-budget", "commitment-credibility"],
       "candidate_changes": [
         {
@@ -50,6 +54,7 @@
     },
     {
       "slug": "permission-boundary-kit",
+      "visibility": "external",
       "mechanism_surfaces": ["tool-permission-leakage", "adverse-selection"],
       "candidate_changes": [
         {
@@ -66,6 +71,7 @@
     },
     {
       "slug": "procurement-simulator",
+      "visibility": "external",
       "mechanism_surfaces": ["winner's-curse", "holdup"],
       "candidate_changes": [
         {

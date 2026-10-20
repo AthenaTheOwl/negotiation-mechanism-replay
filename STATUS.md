@@ -5,13 +5,14 @@
 - v0.1 has a runnable Python CLI, schema loader, renderer, redaction gate, and tag-overlap cross-applier.
 - `negotiations/2026-07-procurement-01.md` is the checked-in safe report artifact.
 - `examples/2026-07-procurement-EXAMPLE.md` is the worked fictional example for gate coverage.
-- Gate commands are `uv run pytest`, `python scripts/voice_lint.py`, `python scripts/spec_check.py`, `python scripts/redact_check.py`, and `python scripts/validate_replay_schema.py`.
+- Gate commands are `uv run pytest`, `python scripts/voice_lint.py`, `python scripts/spec_check.py`, `python scripts/redact_check.py` (refuses without a deny-list; CI passes `--no-denylist`), and `python scripts/validate_replay_schema.py`.
 
 ## Known limits
 
 - Config files use JSON syntax in `.yaml` files so the v0.1 runtime can stay dependency-light.
 - The cross-applier is tag overlap only and does not rank candidates.
 - The redaction gate catches configured names and token patterns; it cannot prove that a paraphrase is safe.
+- The deny-list is local only, so CI checks patterns and never names.
 - The CLI creates a skeleton report, not an interactive authoring flow.
 
 ## Next feature queue

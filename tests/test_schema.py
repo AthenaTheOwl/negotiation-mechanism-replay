@@ -121,7 +121,7 @@ def test_schema_file_is_json_and_requires_redacted_true() -> None:
 def test_report_rejects_unknown_repo_slug() -> None:
     report = load_report(ROOT / "examples" / "2026-07-procurement-EXAMPLE.md")
     try:
-        validate_repo_references(report, {"repos": [{"slug": "different-repo"}]})
+        validate_repo_references(report, {"repos": [{"slug": "different-repo", "visibility": "public"}]})
     except ReplayValidationError as exc:
         assert "repo_slug" in str(exc)
     else:

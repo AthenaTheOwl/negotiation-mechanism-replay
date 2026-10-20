@@ -3,10 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from replay.schema import ReplayReport
+from replay.schema import ReplayReport, repo_label
 
 
-def render_report(report: ReplayReport) -> str:
+def render_report(report: ReplayReport, visibility: dict[str, str] | None = None) -> str:
     lines = [
         "---",
         json.dumps(report.to_dict(), indent=2),
@@ -53,7 +53,7 @@ def render_report(report: ReplayReport) -> str:
     for item in report.cross_applications:
         lines.extend(
             [
-                f"### {item.repo_slug}",
+                f"### {repo_label(item.repo_slug, visibility)}",
                 "",
                 f"- Failing surface: {item.failing_surface}",
                 f"- Recommendation: {item.recommendation}",
@@ -67,8 +67,10 @@ def render_report(report: ReplayReport) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def write_report(report: ReplayReport, path: str | Path) -> None:
-    Path(path).write_text(render_report(report), encoding="utf-8")
+def write_report(
+    report: ReplayReport, path: str | Path, visibility: dict[str, str] | None = None
+) -> None:
+    Path(path).write_text(render_report(report, visibility), encoding="utf-8")
 
 
 _MAGNITUDE_RANK = {"large": 3, "material": 2, "small": 1}
@@ -91,11 +93,20 @@ def _table(headers: list[str], rows: list[list[str]]) -> list[str]:
     return out
 
 
-def render_summary(reports: list[tuple[str, ReplayReport]]) -> str:
+def _short_repo_label(slug: str, visibility: dict[str, str] | None) -> str:
+    if visibility and visibility.get(slug, "public") != "public":
+        return f"{slug} [{visibility[slug]}]"
+    return slug
+
+
+def render_summary(
+    reports: list[tuple[str, ReplayReport]], visibility: dict[str, str] | None = None
+) -> str:
     """Render a ranked, readable digest across one or more replay reports.
 
     Leakages are ranked by magnitude tier; cross-applications by confidence.
-    Both rankings feed a single headline finding.
+    Both rankings feed a single headline finding. Repos that the visibility
+    map marks as anything but public are tagged, e.g. ``[external]``.
     """
     if not reports:
         return "no replay reports found.\n"
@@ -134,7 +145,12 @@ def render_summary(reports: list[tuple[str, ReplayReport]]) -> str:
                 (
                     rank,
                     cross.failing_surface,
-                    [cross.confidence, report_id, cross.repo_slug, cross.failing_surface],
+                    [
+                        cross.confidence,
+                        report_id,
+                        _short_repo_label(cross.repo_slug, visibility),
+                        cross.failing_surface,
+                    ],
                 )
             )
 
@@ -176,6 +192,10 @@ def render_summary(reports: list[tuple[str, ReplayReport]]) -> str:
             f"highest-confidence cross-apply: {top_cross[2][2]} "
             f"({top_cross[2][0]}) - {top_cross[1]}"
         )
+    cross_slugs = {cross.repo_slug for _id, report in reports for cross in report.cross_applications}
+    if visibility and any(visibility.get(slug, "public") != "public" for slug in cross_slugs):
+        lines.append("")
+        lines.append("[external] repos are private or unpublished; there is no public link to follow.")
     lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"

@@ -79,7 +79,7 @@ A buyer compared two capacity paths after supplier-1 inferred schedule pressure 
 
 ## Cross-application to portfolio repos
 
-### agent-routing-table
+### agent-routing-table (external: private or unpublished, not in the public portfolio)
 
 - Failing surface: handoff payloads expose urgency fields before a receiving agent needs them.
 - Recommendation: keep handoff payloads to role-level state and hide preference fields until the receiving agent has a scoped need.

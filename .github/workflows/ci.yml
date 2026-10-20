@@ -42,8 +42,11 @@ jobs:
                       raise SystemExit(f"compile failed: {dir_name}")
           PY
 
-      - name: redact-check
-        run: python -m uv run python scripts/redact_check.py
+      # The real deny-list holds counter-party names and is never committed,
+      # so CI runs the pattern checks only and says so. Without --no-denylist
+      # the gate refuses to certify (exit 2).
+      - name: redact-check (patterns only; deny-list is local)
+        run: python -m uv run python scripts/redact_check.py --no-denylist
 
       - name: spec-check
         run: python -m uv run python scripts/spec_check.py

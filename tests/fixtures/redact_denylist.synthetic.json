@@ -1,0 +1,10 @@
+{
+  "_comment": "Synthetic deny-list for tests only. Every name here is invented; never put a real counter-party name in a committed file.",
+  "named_entities": [
+    "Synthetic Counterparty Ltd",
+    "Fixture Supplier Two"
+  ],
+  "internal_codenames": [
+    "PROJECT-PLACEHOLDER"
+  ]
+}
