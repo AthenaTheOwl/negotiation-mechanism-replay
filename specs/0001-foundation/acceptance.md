@@ -19,7 +19,7 @@ After PR 1-3 land:
 uv run pytest
 python scripts/voice_lint.py
 python scripts/spec_check.py
-python scripts/redact_check.py examples/2026-07-procurement-EXAMPLE.md
+python scripts/redact_check.py --no-denylist examples/2026-07-procurement-EXAMPLE.md
 python scripts/validate_replay_schema.py examples/2026-07-procurement-EXAMPLE.md
 ```
 

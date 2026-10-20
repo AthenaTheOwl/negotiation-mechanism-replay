@@ -21,7 +21,7 @@ v0.1 is accepted when these checks hold.
 uv run pytest
 python scripts/voice_lint.py
 python scripts/spec_check.py
-python scripts/redact_check.py
+python scripts/redact_check.py --no-denylist   # or --denylist PATH
 python scripts/validate_replay_schema.py
 ```
 

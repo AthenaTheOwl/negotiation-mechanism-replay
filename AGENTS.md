@@ -39,9 +39,17 @@ portfolio.
 uv run pytest
 python scripts/voice_lint.py
 python scripts/spec_check.py
-python scripts/redact_check.py
+python scripts/redact_check.py                 # needs config/redact_denylist.yaml
+python scripts/redact_check.py --no-denylist   # patterns only (what CI runs)
 python scripts/validate_replay_schema.py
 ```
+
+The gate fails closed. With no deny-list at `config/redact_denylist.yaml`
+(git-ignored; copy the `.example`), no `--denylist PATH`, or a deny-list
+with no terms, it refuses to certify and exits 2. `--no-denylist` is the
+only way past that, and its output says "patterns only": it has checked
+no names. Tests use `tests/fixtures/redact_denylist.synthetic.json`,
+which holds invented names only. Never commit a real counter-party name.
 
 The `redact_check.py` gate fails the commit if it finds:
 

@@ -6,6 +6,7 @@ from replay.redactor import scan_file, scan_text
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SYNTHETIC_DENYLIST = ROOT / "tests" / "fixtures" / "redact_denylist.synthetic.json"
 
 
 def rules(text: str) -> set[str]:
@@ -13,7 +14,7 @@ def rules(text: str) -> set[str]:
 
 
 def test_checked_in_report_passes_redaction_gate() -> None:
-    assert scan_file(ROOT / "negotiations" / "2026-07-procurement-01.md") == []
+    assert scan_file(ROOT / "negotiations" / "2026-07-procurement-01.md", SYNTHETIC_DENYLIST) == []
 
 
 def test_currency_percentage_and_specific_date_fail() -> None:

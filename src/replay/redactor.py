@@ -46,21 +46,51 @@ def _term_regex(term: str) -> re.Pattern[str]:
     return re.compile(rf"(?<![A-Za-z0-9_-]){re.escape(term)}(?![A-Za-z0-9_-])", re.IGNORECASE)
 
 
-def load_denylist(path: str | Path | None = None) -> dict[str, list[str]]:
+class DenylistNotConfiguredError(ValueError):
+    """Raised when the gate is asked to certify a file without a deny-list."""
+
+
+EMPTY_DENYLIST: dict[str, list[str]] = {"named_entities": [], "internal_codenames": []}
+
+
+def _not_configured(denylist_path: Path, reason: str) -> DenylistNotConfiguredError:
+    return DenylistNotConfiguredError(
+        f"redaction gate refuses to certify: {reason} ({denylist_path}). "
+        "Without it the named-entity and internal-codename checks have nothing "
+        "to match, so every counter-party name passes. Copy "
+        "config/redact_denylist.yaml.example to config/redact_denylist.yaml "
+        "(git-ignored) and list the real names there, or pass --denylist PATH. "
+        "To run only the pattern checks (currency, percentages, dates) and "
+        "certify nothing about names, pass --no-denylist."
+    )
+
+
+def load_denylist(path: str | Path | None = None, *, required: bool = True) -> dict[str, list[str]]:
+    """Load the deny-list; fail closed when it is missing or empty.
+
+    With ``required=False`` a missing file returns empty lists. Only the
+    explicit ``--no-denylist`` CLI flag should take that path.
+    """
     denylist_path = Path(path) if path else DEFAULT_DENYLIST_PATH
     if not denylist_path.exists():
-        return {"named_entities": [], "internal_codenames": []}
+        if required:
+            raise _not_configured(denylist_path, "no deny-list found")
+        return {key: [] for key in EMPTY_DENYLIST}
     data = json.loads(denylist_path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"denylist must contain an object: {denylist_path}")
-    return {
-        "named_entities": list(data.get("named_entities", [])),
-        "internal_codenames": list(data.get("internal_codenames", [])),
+    denylist = {
+        "named_entities": [str(term) for term in data.get("named_entities", []) if term],
+        "internal_codenames": [str(term) for term in data.get("internal_codenames", []) if term],
     }
+    if required and not any(denylist.values()):
+        raise _not_configured(denylist_path, "the deny-list has no named_entities or internal_codenames")
+    return denylist
 
 
 def scan_text(text: str, denylist: dict[str, Iterable[str]] | None = None) -> list[RedactionFinding]:
-    denylist = denylist or {"named_entities": [], "internal_codenames": []}
+    """Scan one string. A missing ``denylist`` checks patterns only."""
+    denylist = denylist or EMPTY_DENYLIST
     findings: list[RedactionFinding] = []
 
     for match in CURRENCY_RE.finditer(text):
@@ -96,9 +126,14 @@ def scan_text(text: str, denylist: dict[str, Iterable[str]] | None = None) -> li
     return sorted(findings, key=lambda item: (item.line, item.rule, item.matched_text.lower()))
 
 
-def scan_file(path: str | Path, denylist_path: str | Path | None = None) -> list[RedactionFinding]:
+def scan_file(
+    path: str | Path,
+    denylist_path: str | Path | None = None,
+    *,
+    require_denylist: bool = True,
+) -> list[RedactionFinding]:
     text = Path(path).read_text(encoding="utf-8")
-    return scan_text(text, load_denylist(denylist_path))
+    return scan_text(text, load_denylist(denylist_path, required=require_denylist))
 
 
 def format_findings(path: str | Path, findings: list[RedactionFinding]) -> list[str]:

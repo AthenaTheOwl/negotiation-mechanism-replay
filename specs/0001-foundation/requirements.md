@@ -46,7 +46,10 @@ finds named entities from a deny-list, currency tokens (`$`, `USD`,
 `EUR`, etc.), percentage tokens (`%`), specific calendar dates more
 precise than month-year, or internal codename matches. The deny-list
 lives at `config/redact_denylist.yaml` and is itself git-ignored
-beyond a placeholder template.
+beyond a placeholder template. The gate fails closed: when no
+deny-list is configured, or it lists no terms, it refuses to certify
+(exit 2) unless `--no-denylist` is passed, and a `--no-denylist` pass
+is reported as "patterns only".
 
 ## R-NMR-009 — file naming
 Files live at `negotiations/<id>.md` with round-trippable front

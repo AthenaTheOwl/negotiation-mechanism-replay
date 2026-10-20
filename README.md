@@ -21,6 +21,14 @@ internal codenames — is not a valid checked-in artifact. The tool also refuses
 path under `data/raw/` or `data/private/`, so raw day-job material never has a way
 in.
 
+The names it must refuse are the one thing that cannot be committed, so the
+deny-list lives in `config/redact_denylist.yaml`, which git ignores. Without it the
+gate refuses to certify anything and exits 2. Copy
+`config/redact_denylist.yaml.example` and fill it in, or point `--denylist` at a
+file. `--no-denylist` runs the currency, percentage and date checks alone, labels
+every pass "patterns only", and certifies nothing about names. CI uses it,
+because CI has no names to check against.
+
 ## Try it
 
 One command, reads only the committed reports, no network, exits 0:
@@ -103,14 +111,15 @@ The repo index lives at `config/repo_index.yaml`; the mechanism taxonomy at
 uv run pytest
 python scripts/voice_lint.py
 python scripts/spec_check.py
-python scripts/redact_check.py
+python scripts/redact_check.py                 # needs config/redact_denylist.yaml
+python scripts/redact_check.py --no-denylist   # patterns only, as CI runs it
 python scripts/validate_replay_schema.py
 ```
 
 Target a single report:
 
 ```bash
-python scripts/redact_check.py negotiations/2026-07-procurement-01.md
+python scripts/redact_check.py --denylist config/redact_denylist.yaml negotiations/2026-07-procurement-01.md
 python scripts/validate_replay_schema.py negotiations/2026-07-procurement-01.md
 uv run replay cross-apply --negotiation-id 2026-07-procurement-01
 ```
@@ -120,6 +129,8 @@ Create a skeleton from a sanitized draft:
 ```bash
 uv run replay new --negotiation-id 2026-07-procurement-02 --draft-path negotiations/_drafts/safe-summary.md
 ```
+
+`new` scans the draft with the same gate and refuses it without a deny-list.
 
 The CLI refuses paths under `data/raw/` and `data/private/`.
 

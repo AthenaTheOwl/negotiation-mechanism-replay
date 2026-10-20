@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from replay.matcher import load_repo_index, match_cross_applications
-from replay.redactor import format_findings, scan_file
+from replay.redactor import DenylistNotConfiguredError, format_findings, load_denylist, scan_text
 from replay.render import render_report, render_summary, write_report
 from replay.schema import (
     CrossApplication,
@@ -42,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     new_parser.add_argument("--negotiation-id", required=True)
     new_parser.add_argument("--draft-path")
     new_parser.add_argument("--force", action="store_true")
+    _add_denylist_arguments(new_parser)
 
     cross_parser = subparsers.add_parser("cross-apply", help="emit repo-index matches for a replay")
     cross_parser.add_argument("--negotiation-id", required=True)
@@ -52,7 +53,7 @@ def main(argv: list[str] | None = None) -> int:
 
     redact_parser = subparsers.add_parser("redact-check", help="run the redaction gate")
     redact_parser.add_argument("paths", nargs="*")
-    redact_parser.add_argument("--denylist")
+    _add_denylist_arguments(redact_parser)
 
     validate_parser = subparsers.add_parser("validate", help="validate replay schema and repo references")
     validate_parser.add_argument("paths", nargs="*")
@@ -74,11 +75,14 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(render_report(report))
             return 0
         if args.command == "redact-check":
-            return _redact_check(args.paths, args.denylist)
+            return _redact_check(args.paths, args.denylist, args.no_denylist)
         if args.command == "validate":
             return _validate(args.paths, args.repo_index)
         if args.command == "show":
             return _show(args.paths)
+    except DenylistNotConfiguredError as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
     except (ReplayValidationError, OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
@@ -95,7 +99,8 @@ def _new(args: argparse.Namespace) -> int:
     if args.draft_path:
         draft_path = Path(args.draft_path)
         _guard_public_path(draft_path)
-        findings = scan_file(draft_path)
+        denylist = _load_gate_denylist(args.denylist, args.no_denylist)
+        findings = scan_text(draft_path.read_text(encoding="utf-8"), denylist)
         if findings:
             for line in format_findings(draft_path, findings):
                 print(line, file=sys.stderr)
@@ -149,18 +154,47 @@ def _cross_apply(args: argparse.Namespace) -> int:
     return 0 if candidates else 1
 
 
-def _redact_check(paths: list[str], denylist: str | None) -> int:
+def _add_denylist_arguments(parser: argparse.ArgumentParser) -> None:
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--denylist",
+        help="deny-list JSON with named_entities and internal_codenames "
+        "(default: config/redact_denylist.yaml; the gate refuses to run without one)",
+    )
+    group.add_argument(
+        "--no-denylist",
+        action="store_true",
+        help="run only the pattern checks (currency, percentages, dates); "
+        "named entities and codenames are NOT checked",
+    )
+
+
+def _load_gate_denylist(denylist_path: str | None, no_denylist: bool) -> dict[str, list[str]]:
+    if no_denylist:
+        print(
+            "WARNING: --no-denylist: named-entity and internal-codename checks are "
+            "skipped; only currency, percentage and date patterns are checked.",
+            file=sys.stderr,
+        )
+        return {"named_entities": [], "internal_codenames": []}
+    return load_denylist(denylist_path)
+
+
+def _redact_check(paths: list[str], denylist_path: str | None, no_denylist: bool = False) -> int:
     target_paths = _default_report_paths() if not paths else [Path(path) for path in paths]
-    had_findings = False
     for path in target_paths:
         _guard_public_path(path)
-        findings = scan_file(path, denylist)
+    denylist = _load_gate_denylist(denylist_path, no_denylist)
+    scope = " (patterns only, no deny-list)" if no_denylist else ""
+    had_findings = False
+    for path in target_paths:
+        findings = scan_text(Path(path).read_text(encoding="utf-8"), denylist)
         if findings:
             had_findings = True
             for line in format_findings(path, findings):
                 print(line, file=sys.stderr)
         else:
-            print(f"ok: {path}")
+            print(f"ok{scope}: {path}")
     return 1 if had_findings else 0
 
 
